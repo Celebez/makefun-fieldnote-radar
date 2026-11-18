@@ -1,0 +1,24 @@
+import {readFileSync,writeFileSync,mkdirSync,cpSync,existsSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {join} from 'node:path';
+import {runInNewContext} from 'node:vm';
+import {buildDossier} from './vendor/makefun-board.ts';
+// Keep output computation and UI computation identical: execute the same model.
+const root=fileURLToPath(new URL('.',import.meta.url));
+const args=process.argv.slice(2);
+const input=args.includes('--input')?args[args.indexOf('--input')+1]:'/input/snapshot.json';
+const out=process.env.MAKEFUN_OUTPUT_DIR||'/output';
+const snapshot=JSON.parse(readFileSync(input,'utf8'));
+const context:any={};
+runInNewContext(readFileSync(join(root,'dashboard/model.js'),'utf8'),context);
+const radar=context.RadarModel.build(snapshot);
+if(radar.rows.length<100)throw new Error('Fewer than 100 eligible protocols');
+const slugs=new Set(radar.rows.map((r:any)=>r.slug));
+if(snapshot.watchlist.some((s:string)=>!slugs.has(s)))throw new Error('Missing watchlist protocol');
+mkdirSync(out,{recursive:true});
+writeFileSync(join(out,'board.json'),JSON.stringify({rows:radar.rows})+'\n');
+writeFileSync(join(out,'data.js'),'const SNAPSHOT='+JSON.stringify(snapshot).replace(/</g,'\\u003c')+';\n');
+cpSync(join(root,'dashboard'),join(out,'dashboard'),{recursive:true});
+cpSync(join(root,'screenshots'),join(out,'screenshots'),{recursive:true});
+writeFileSync(join(out,'dossier.json'),buildDossier(out,{text_max_bytes:65536}));
+console.log(JSON.stringify({rows:radar.rows.length,watchlist:radar.watch_count,live:radar.live.length,peers:radar.peer_count}));
