@@ -43,8 +43,7 @@ function calibration(peers, target) {
   return {near, category, categoryWeight, nearComparable, nearQuantiles, categoryQuantiles, range};
 }
 function audit(peers) {
-  // Withhold each observed market cap and any records identifying the same token.
-  // This tests calibration on traded records, not launch prices for unissued tokens.
+  // Withhold each cap and same-token records; tests the multiple on traded records.
   const absoluteLogError = {fixed:[], prior:[], size:[]};
   let count = 0;
   for (const p of peers) {
@@ -69,5 +68,5 @@ function audit(peers) {
   }
   return {count, metrics};
 }
-root.RadarCalibration = {clip, compareKey, hasToken, productReason, makePeers, calibration, audit};
+root.RadarCalibration = {clip, compareKey, hasToken, productReason, makePeers, calibration, audit, percentile};
 })(globalThis);

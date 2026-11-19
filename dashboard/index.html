@@ -16,9 +16,10 @@
   <main id="main" class="frame" tabindex="-1">
     <section class="intro" aria-labelledby="title">
       <div><p class="eyebrow">DeFi research desk</p><h1 id="title">Token launch radar</h1>
-      <p class="subhead">Explore protocols with no token recorded. Compare implied market caps and check what it would take to try each product.</p></div>
+      <p class="subhead">Tokenless protocols ranked by odds-adjusted implied cap, with launch odds, farm economics and held-out validation.</p></div>
       <dl id="metrics" class="metrics" aria-label="Snapshot coverage"></dl>
     </section>
+    <section id="assurance" class="assurance" aria-label="Integrity seal and model validation"></section>
     <div class="workspace">
       <section class="surface board" aria-label="Protocol board">
         <nav id="boardTabs" class="board-tabs" aria-label="Protocol views">
@@ -43,6 +44,7 @@
               <th scope="col" class="number"><button data-sort="tvl_usd">TVL</button></th>
               <th scope="col" class="number"><button data-sort="change_7d">7d TVL</button></th>
               <th scope="col" class="number" id="valueColumn"><button id="valueSort" data-sort="implied_value_usd">Implied cap</button></th>
+              <th scope="col" id="econColumn">Farm</th>
               <th scope="col" id="planColumn">Trial</th><th scope="col" id="pinColumn"><span class="sr">Compare</span></th></tr></thead>
             <tbody id="rows"></tbody>
           </table>
@@ -60,17 +62,15 @@
   </div></dialog>
   <dialog id="method" class="dialog" aria-labelledby="methodTitle"><div class="dialog-inner">
     <div class="dialog-head"><div><p class="eyebrow">Valuation</p><h2 id="methodTitle">Method &amp; validation</h2></div><button id="closeMethod" type="button">Close</button></div>
-    <p class="formula">TVL × peer multiple × 7-day growth factor × tracking-age factor</p>
-    <ol class="method-list">
-      <li>Choose the 23 nearest traded peers by absolute log TVL distance. Use positive market caps and exclude bridges, exchanges and wrapper products. Clip each market cap-to-TVL ratio to 0.05–5×.</li>
-      <li>Blend the log-ratio quantiles of size peers and category peers. The category gets weight n / (n + 8), with at most 23 category peers. The median sets the base case. The 20th and 80th percentiles set the peer cases.</li>
-      <li>Apply (1 + g)^0.30, with 7-day growth g clipped to −50%…100%. Apply 0.70 + 0.30 × min(days tracked, 1,095) / 1,095 for age. Missing observations use 0% growth or 365 days, with a flag.</li>
-    </ol>
+    <p class="formula">TVL × peer multiple × growth × age × launch odds = implied cap</p>
+    <p class="note">Method lives in calibration.js, model.js and odds.js; the audits below test it on held-out records.</p>
     <div id="modelAudit" aria-label="Validation on traded records"></div>
-    <p class="note">The peer cases describe observed ratio spread. The snapshot provides no launch probability, token economics, current fees or airdrop eligibility.</p>
+    <div id="launchAudit" aria-label="Launch model validation"></div>
+    <div id="coverageAudit" aria-label="Range coverage"></div>
+    <p class="note">Peer cases describe observed ratio spread. Fees, eligibility and airdrop terms are unverified; economics are expectations, not promises.</p>
   </div></dialog>
   <script src="../data.js"></script>
-  <script src="calibration.js"></script><script src="plans.js"></script><script src="model.js"></script>
+  <script src="calibration.js"></script><script src="odds.js"></script><script src="plans.js"></script><script src="model.js"></script>
   <script src="detail.js"></script><script src="desk.js"></script>
 </body>
 </html>

@@ -1,0 +1,38 @@
+[
+ {
+  "pattern": "^Risk Curators$",
+  "label": "Curated vault",
+  "capital": 0,
+  "text": "Identify the underlying vault, curator role and contract in its documentation. Check asset concentration, curator permissions and available redemption liquidity."
+ },
+ {
+  "pattern": "^(RWA|CeDeFi|Onchain Capital Allocator|Insurance|Chain|Payments|Governance Incentives|Staking Pool|Restaking|Collateral Markets|Basis Trading)$",
+  "label": "Research first",
+  "capital": 0,
+  "text": "Identify a documented public product and its access terms. Check custody, lockup and redemption, and record whether a small, reversible trial is possible."
+ },
+ {
+  "pattern": "^CDP$",
+  "label": "Collateral research",
+  "capital": 0,
+  "text": "Read the collateral requirements, liquidation threshold, costs and repayment route. Use a preview to understand the position without opening debt."
+ },
+ {
+  "pattern": "^Lending$",
+  "label": "Supply-only trial",
+  "capital": 50,
+  "text": "Find a verified public market that accepts an asset you already hold. Review deposit cap, utilization and redemption liquidity before previewing a supply-only position. Keep borrowing disabled."
+ },
+ {
+  "pattern": "^(Dexs|Liquidity Manager)$",
+  "label": "Single swap trial",
+  "capital": 10,
+  "text": "Preview one swap for an asset you need on a documented liquid pair. Record the fee, price impact and minimum output. Skip the trial if price impact exceeds 0.5%."
+ },
+ {
+  "pattern": "^(Yield|Yield Aggregator)$",
+  "label": "Vault trial",
+  "capital": 25,
+  "text": "Find a documented vault with a deposit minimum below the limit. Verify the underlying asset, share price, current capacity and lockup before previewing a deposit."
+ }
+]
