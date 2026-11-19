@@ -1,12 +1,76 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fieldnote — Token Launch Radar</title><link rel="stylesheet" href="app.css"></head><body>
-<header><div class="brand"><b>F<span>·</span></b><div>FIELDNOTE<small>TOKEN LAUNCH RESEARCH</small></div></div><div class="stamp" id="stamp"></div><button id="methodBtn">Model & evidence ↗</button></header>
-<main><div class="title"><div><p class="eyebrow">RESEARCH DESK / 01</p><h1>Find the signal before the token.</h1></div><p class="subtitle">A transparent valuation lens.<br>Concrete, costed product trials.</p></div>
-<div class="metrics" id="metrics"></div>
-<div class="workspace"><section class="board"><div class="tabs"><button class="active" data-tab="early">No token recorded <span id="earlyCount"></span></button><button data-tab="live">Trading tokens</button><button data-tab="excluded">Product exclusions</button></div>
-<div class="filters"><input id="search" placeholder="Search protocols or chains…" aria-label="Search protocols"><select id="category" aria-label="Category"><option value="">All categories</option></select><select id="chain" aria-label="Chain"><option value="">All chains</option></select><select id="scope" aria-label="Scope"><option value="">All research</option><option value="watch">Watchlist floor</option><option value="below">Below $50M</option><option value="trial">Conditional trials</option></select></div>
-<div class="boardlabel"><span id="resultCount"></span><span id="sortLabel">VALUE ↓ · click a row to inspect</span></div>
-<div class="tablewrap"><table><thead><tr><th>#</th><th><button data-sort="name">Protocol ↕</button></th><th><button data-sort="tvl_usd">TVL ↕</button></th><th><button data-sort="change_7d">7d ↕</button></th><th><button data-sort="implied_value_usd">Implied value ↓</button></th><th>Plan</th></tr></thead><tbody id="rows"></tbody></table></div><div class="empty" id="empty" hidden>No protocols match. Clear a filter to broaden the search.</div><div class="pager"><button id="prev">← Previous</button><span id="page"></span><button id="next">Next →</button><button id="export">Export filtered CSV</button></div></section><aside id="detail"></aside></div>
-<footer><span>SEALED SNAPSHOT · No live prices or token-launch prediction</span><span id="coverage"></span></footer></main>
-<dialog id="method"><button id="closeMethod">Close ×</button><p class="eyebrow">MODEL NOTE / v1.0</p><h2>Show your working.</h2><p>Implied token market capitalization is a scenario, not a forecast or an airdrop valuation. Principal and fees are not expected rewards.</p><pre>TVL × peer multiple × growth factor × history factor</pre><div id="modelSummary"></div><h3>How the calculation works</h3><ol><li>Use traded-token protocols with a reported positive market cap and TVL. Exclude wrapped / staked products, bridges and CEXs from comparables.</li><li>Winsorize each market-cap / TVL ratio to 0.05–5×. Blend the category median with the universe median using n / (n + 8). Sparse groups shrink toward the universe.</li><li>Growth factor = (1 + clipped 7-day growth / 100)^0.30, with growth clipped to −50%…100%. Missing growth uses 0%, flagged in detail.</li><li>History factor = 0.70 + 0.30 × min(tracking age, 1,095) / 1,095. Unknown tracking age uses 365 days. Tracking age is not protocol launch age.</li><li>The low/high band is an assumption sensitivity envelope: ±35%, widened by 15 points for fewer than four peers and 10 points each for missing age/growth. It is not a statistical confidence interval.</li></ol><h3>Boundaries</h3><p>TVL is not revenue, tokenholder cash flow or safety. Category peers may not be economically comparable. A protocol may already have a token absent from this record. Plans are conditional product workflows, not verified eligibility. Fees, access, rates and withdrawal delays require independent checks. No protocol or chain receives a special score by name.</p></dialog>
-<script src="../data.js"></script><script src="model.js"></script><script src="app.js"></script></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fieldnote | Token Launch Radar</title>
+  <link rel="stylesheet" href="desk.css">
+</head>
+<body>
+  <header class="mast">
+    <div class="frame mast-inner">
+      <a href="#main" class="wordmark" aria-label="Fieldnote, skip to the radar"><span class="mark" aria-hidden="true">F.</span> Fieldnote</a>
+      <div class="mast-end"><span id="stamp" class="snapshot"></span><button id="methodBtn" type="button">Method &amp; validation</button></div>
+    </div>
+  </header>
+  <main id="main" class="frame" tabindex="-1">
+    <section class="intro" aria-labelledby="title">
+      <div><p class="eyebrow">DeFi research desk</p><h1 id="title">Token launch radar</h1>
+      <p class="subhead">Explore protocols with no token recorded. Compare implied market caps and check what it would take to try each product.</p></div>
+      <dl id="metrics" class="metrics" aria-label="Snapshot coverage"></dl>
+    </section>
+    <div class="workspace">
+      <section class="surface board" aria-label="Protocol board">
+        <nav id="boardTabs" class="board-tabs" aria-label="Protocol views">
+          <button type="button" data-tab="early" aria-pressed="true">Candidates <span id="earlyCount"></span></button>
+          <button type="button" data-tab="live" aria-pressed="false">Token recorded</button>
+          <button type="button" data-tab="excluded" aria-pressed="false">Screened out</button>
+        </nav>
+        <div class="filters">
+          <label class="searchbox" for="search"><span class="sr">Find a protocol</span><input id="search" type="search" placeholder="Find a protocol" maxlength="120" autocomplete="off"><kbd>/</kbd></label>
+          <select id="category" aria-label="Category"></select>
+          <select id="chain" aria-label="Chain"></select>
+          <select id="scope" aria-label="Candidate scope">
+            <option value="">All candidates</option><option value="watch">Watchlist only</option><option value="below">Below TVL floor</option>
+            <option value="trial">Conditional trials</option><option value="sourced">Documented routes</option><option value="exceptions">Coverage exceptions</option>
+          </select>
+        </div>
+        <div class="board-label"><p id="resultCount" aria-live="polite"></p><button id="compareBtn" type="button" disabled>Compare <span id="pinCount">0 / 3</span></button></div>
+        <div id="pins" class="pin-tray" aria-label="Pinned candidates" hidden></div>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Sortable protocol results">
+          <table id="boardTable">
+            <thead><tr><th scope="col">#</th><th scope="col"><button data-sort="name">Protocol</button></th>
+              <th scope="col" class="number"><button data-sort="tvl_usd">TVL</button></th>
+              <th scope="col" class="number"><button data-sort="change_7d">7d TVL</button></th>
+              <th scope="col" class="number" id="valueColumn"><button id="valueSort" data-sort="implied_value_usd">Implied cap</button></th>
+              <th scope="col" id="planColumn">Trial</th><th scope="col" id="pinColumn"><span class="sr">Compare</span></th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <div id="empty" class="empty" hidden><strong>No matches</strong><p>Broaden the search or clear your filters.</p><button id="emptyReset" type="button">Clear filters</button></div>
+        <div class="pager"><button id="prev" type="button" aria-label="Previous page">←</button><span id="page" aria-live="polite"></span><button id="next" type="button" aria-label="Next page">→</button><button id="export" type="button">Export CSV</button></div>
+      </section>
+      <aside id="detail" class="surface detail" aria-label="Selected protocol" tabindex="-1"></aside>
+    </div>
+    <footer><span id="coverage"></span><span id="source"></span></footer>
+  </main>
+  <dialog id="compare" class="dialog dialog-wide" aria-labelledby="compareTitle"><div class="dialog-inner">
+    <div class="dialog-head"><div><p class="eyebrow">Research workspace</p><h2 id="compareTitle">Compare candidates</h2></div><button id="closeCompare" type="button">Close</button></div>
+    <div id="compareBody"></div>
+  </div></dialog>
+  <dialog id="method" class="dialog" aria-labelledby="methodTitle"><div class="dialog-inner">
+    <div class="dialog-head"><div><p class="eyebrow">Valuation</p><h2 id="methodTitle">Method &amp; validation</h2></div><button id="closeMethod" type="button">Close</button></div>
+    <p class="formula">TVL × peer multiple × 7-day growth factor × tracking-age factor</p>
+    <ol class="method-list">
+      <li>Choose the 23 nearest traded peers by absolute log TVL distance. Use positive market caps and exclude bridges, exchanges and wrapper products. Clip each market cap-to-TVL ratio to 0.05–5×.</li>
+      <li>Blend the log-ratio quantiles of size peers and category peers. The category gets weight n / (n + 8), with at most 23 category peers. The median sets the base case. The 20th and 80th percentiles set the peer cases.</li>
+      <li>Apply (1 + g)^0.30, with 7-day growth g clipped to −50%…100%. Apply 0.70 + 0.30 × min(days tracked, 1,095) / 1,095 for age. Missing observations use 0% growth or 365 days, with a flag.</li>
+    </ol>
+    <div id="modelAudit" aria-label="Validation on traded records"></div>
+    <p class="note">The peer cases describe observed ratio spread. The snapshot provides no launch probability, token economics, current fees or airdrop eligibility.</p>
+  </div></dialog>
+  <script src="../data.js"></script>
+  <script src="calibration.js"></script><script src="plans.js"></script><script src="model.js"></script>
+  <script src="detail.js"></script><script src="desk.js"></script>
+</body>
+</html>
