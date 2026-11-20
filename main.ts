@@ -19,6 +19,7 @@ for (const file of modelFiles) {
 // Curated route/workflow data stays outside dashboard/ (the dossier reads dashboard source only).
 const routes=JSON.parse(readFileSync(join(root,'routes.json'),'utf8'));
 routes.workflows=JSON.parse(readFileSync(join(root,'workflows.json'),'utf8'));
+routes.plantext=JSON.parse(readFileSync(join(root,'plantext.json'),'utf8'));
 context.RadarPlans.init(routes);
 const radar=context.RadarModel.build(snapshot);
 if(radar.rows.length<100 || radar.rows.length>4000)throw new Error('Ranked row count outside 100–4,000');
@@ -79,4 +80,4 @@ writeFileSync(join(out,'data.js'),'const SNAPSHOT='+JSON.stringify(snapshot).rep
 cpSync(join(root,'dashboard'),join(out,'dashboard'),{recursive:true});
 cpSync(join(root,'screenshots'),join(out,'screenshots'),{recursive:true});
 writeFileSync(join(out,'dossier.json'),buildDossier(out,{text_max_bytes:65536}));
-console.log(JSON.stringify({rows:radar.rows.length,watchlist:radar.watch_covered,live:radar.live.length,excluded:radar.excluded.length,peers:radar.peer_count,audit:radar.audit,launchValidation:radar.launch.validation,coverage:radar.coverage}));
+console.log(JSON.stringify({rows:radar.rows.length,watchlist:radar.watch_covered,live:radar.live.length,excluded:radar.excluded.length,peers:radar.peer_count,audit:radar.audit,launchValidation:radar.launch.validation,walkForward:radar.launch.walkForward,coverage:radar.coverage}));

@@ -112,8 +112,8 @@ th{text-align:left}
 .source-note span{overflow-wrap:anywhere;text-decoration:underline}
 .scenario-controls{display:grid;grid-template-columns:1fr 1fr;gap:.35rem .52rem}
 .scenario-controls label{font-size:.73rem;color:var(--muted)}
-.scenario-controls select,.scenario-controls input{width:100%;margin-top:.2rem}
-.scenario-controls select{padding:.29rem}
+.scenario-controls select,.econ-controls select{width:100%;padding:.29rem;margin-top:.2rem}
+.scenario-controls input{width:100%;margin-top:.2rem}
 .scenario-controls input{accent-color:var(--accent);height:1rem}
 .scenario-controls button{padding:.23rem .48rem;width:max-content;font-size:.73rem}
 .scenario-controls output{color:var(--accent);font-weight:700}
@@ -153,6 +153,5 @@ footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.44rem;padd
 .econ-panel{border-top:1px solid var(--line);margin-top:.67rem;padding-top:.6rem}
 .econ-controls{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.4rem 0}
 .econ-controls label{font-size:.73rem;color:var(--muted)}
-.econ-controls select{width:100%;padding:.29rem;margin-top:.2rem}
 .econ-head{display:flex;align-items:center;gap:.45rem;font-size:.8rem;margin-bottom:.4rem;flex-wrap:wrap}
 @media (max-width:1060px){.workspace{grid-template-columns:minmax(0,1fr)}}

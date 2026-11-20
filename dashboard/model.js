@@ -32,7 +32,7 @@ function estimate(protocol, watch, peers, day, launch) {
     routeSource:trial.note, documentedRoute:trial.verifiedRoute, routeChain:trial.chain, plan:trial.steps,
     plan_hours:trial.hours, launch_odds:odds.odds, ever:odds.ever, launchF:odds.F, byNow:odds.byNow,
     farm_steps:trial.steps.map(step => `${step.title}: ${step.text} Cost: ${step.cost}. Time: ${step.time}.`)};
-  // Rank odds-adjusted; keep the if-launches value visible.
+  // Rank odds-adjusted; if-launches stays visible.
   row.value_if_launches = project(row).value;
   row.implied_value_usd = positiveCap(row.value_if_launches * odds.odds);
   row.low = positiveCap(project(row, {peerCase:'downside'}).value * odds.odds);
@@ -63,7 +63,8 @@ function build(snapshot) {
     watch_count:watch.size, watch_covered:watchCovered, peer_count:peers.length,
     audit:audit(peers), universe:snapshot.protocols.length, coverage:root.RadarOdds.coverageAudit(peers),
     launch:{everGlobal:launch.everGlobal, everGlobalCorrected:launch.everGlobalCorrected,
-      bucketStats:launch.bucketStats, validation:launch.validation},
+      bucketStats:launch.bucketStats, validation:launch.validation,
+      walkForward:root.RadarOdds.walkForward(snapshot.protocols, day)},
     composition:{universe:snapshot.protocols.length, candidates:rows.length, watch:watchCovered,
       additional:rows.length - watchCovered, traded:live.length, screened:excluded.length}};
 }

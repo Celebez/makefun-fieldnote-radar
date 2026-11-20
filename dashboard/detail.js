@@ -16,12 +16,13 @@ const ratio = value => value.toFixed(3) + '×';
 const band = row => `${compact(row.low)} – ${compact(row.high)}`;
 const verdictClass = {Farm:'positive',Marginal:'neutral',Skip:'negative',Research:'neutral'};
 const usd = x => (x < 0 ? '−$' : '$') + Math.abs(x).toFixed(2);
+const table = (head, body) => `<div class="compare-table"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
 function estimate(row) {
 return `<div class="estimate"><div class="estimate-label">Implied market cap · odds-adjusted</div><strong title="${money(row.implied_value_usd)}">${compact(row.implied_value_usd)}</strong><div class="waterfall"><span>If launches <b>${compact(row.value_if_launches)}</b></span><span>× launch odds <b>${(row.launch_odds*100).toFixed(0)}%</b></span></div><div class="range"><span>Peer range</span><b>${band(row)}</b></div>${row.flags.includes('Few similar-size peers') ? '<p class="valuation-flag">Few peers near this TVL</p>' : ''}</div>`;
 }
 function econResult(row, opts) {
 const e = root.RadarOdds.farmEconomics(row, opts);
-return `<div class="econ-head"><span class="tag ${verdictClass[e.verdict]}">${e.verdict}</span><b>${usd(e.net)}</b> net · ${e.hours.toFixed(1)} h · ${usd(e.perHour)}/h</div><dl class="facts">${fact('Expected drop', usd(e.drop))}${fact('Fee budget', usd(e.fees))}${fact('T-bill hurdle 4% · 12 wk', usd(e.hurdle))}${fact('Break-even launch odds', (e.breakEvenOdds*100).toFixed(1)+'%')}</dl><p class="note">Drop = if-launches × odds × ${(e.dropShare*100).toFixed(1)}% share × deposit/(TVL+deposit). Per $1k pro-rata: ${usd(e.dropPer1000)}. Expectation, not a promise.</p>`;
+return `<div class="econ-head"><span class="tag ${verdictClass[e.verdict]}">${e.verdict}</span><b>${usd(e.net)}</b> net · ${e.hours.toFixed(1)} h · ${usd(e.perHour)}/h</div><dl class="facts">${fact('Expected drop', usd(e.drop))}${fact('Fee budget', usd(e.fees))}${fact('T-bill hurdle 4% · 12 wk', usd(e.hurdle))}${fact('Break-even launch odds', (e.breakEvenOdds*100).toFixed(1)+'%')}</dl><p class="note">Drop = if-launches × odds × ${(e.dropShare*100).toFixed(1)}% share × deposit/(TVL+deposit). Per $1k pro-rata: ${usd(e.dropPer1000)}.</p>`;
 }
 function economics(row) {
 const dep = row.capital || 1000;
@@ -42,7 +43,7 @@ return `<div class="formula" aria-label="Valuation calculation">${money(values.t
 function scenarios(row) {
 const peers = row.calibration;
 const lists = [['Nearest by TVL',peers.near],['Same category',peers.category]];
-return `<div class="scenario-controls"><label for="peerCase">Peer case<select id="peerCase"><option value="downside">Lower ratios</option><option value="base" selected>Median ratios</option><option value="upside">Higher ratios</option></select></label><label for="tvlShift">TVL change <output id="shiftLabel" for="tvlShift">0%</output><input id="tvlShift" type="range" min="-50" max="50" step="5" value="0"></label><button id="resetScenario" type="button">Reset</button></div><div id="scenarioResult" class="scenario-result" aria-live="polite"></div><p class="note">Growth, tracking age and peer set held fixed; ranking stays at the base case.</p><h3>Peer evidence</h3><dl class="facts">${fact('Size-peer median', ratio(peers.nearQuantiles[1]))}${fact('Category median', peers.category.length ? ratio(peers.categoryQuantiles[1]) : 'No observations')}${fact('Category weight', (peers.categoryWeight*100).toFixed(1)+'%')}${fact('Base multiple', ratio(row.peerValues.base))}</dl>${lists.map(([title,list]) => `<details class="peer-list"><summary>${title} · ${list.length}</summary>${list.length ? `<ul>${list.map(peer => `<li><span>${escape(peer.name)}<small>${compact(peer.cap)} cap · ${compact(peer.tvl)} TVL</small></span><b title="Raw ${ratio(peer.ratio)}">${ratio(peer.used)}</b></li>`).join('')}</ul>` : '<p class="note">The size set supplies the distribution.</p>'}</details>`).join('')}`;
+return `<div class="scenario-controls"><label for="peerCase">Peer case<select id="peerCase"><option value="downside">Lower ratios</option><option value="base" selected>Median ratios</option><option value="upside">Higher ratios</option></select></label><label for="tvlShift">TVL change <output id="shiftLabel" for="tvlShift">0%</output><input id="tvlShift" type="range" min="-50" max="50" step="5" value="0"></label><button id="resetScenario" type="button">Reset</button></div><div id="scenarioResult" class="scenario-result" aria-live="polite"></div><p class="note">Growth, age and peers fixed; ranking stays at base case.</p><h3>Peer evidence</h3><dl class="facts">${fact('Size-peer median', ratio(peers.nearQuantiles[1]))}${fact('Category median', peers.category.length ? ratio(peers.categoryQuantiles[1]) : 'No observations')}${fact('Category weight', (peers.categoryWeight*100).toFixed(1)+'%')}${fact('Base multiple', ratio(row.peerValues.base))}</dl>${lists.map(([title,list]) => `<details class="peer-list"><summary>${title} · ${list.length}</summary>${list.length ? `<ul>${list.map(peer => `<li><span>${escape(peer.name)}<small>${compact(peer.cap)} cap · ${compact(peer.tvl)} TVL</small></span><b title="Raw ${ratio(peer.ratio)}">${ratio(peer.used)}</b></li>`).join('')}</ul>` : '<p class="note">The size set supplies the distribution.</p>'}</details>`).join('')}`;
 }
 function scenarioResult(row, input) {
 const values = root.RadarModel.project(row, input);
@@ -62,9 +63,9 @@ const tabs = [['overview','Overview'],['model','Scenario'],['plan','Field plan']
 return intro + estimate(row) + `<nav class="detail-tabs" aria-label="Candidate detail">${tabs.map(([key,label]) => `<button type="button" data-panel="${key}" aria-pressed="${panel === key}">${label}</button>`).join('')}</nav><div class="detail-body">${panel === 'model' ? scenarios(row) : panel === 'plan' ? plan(row) : overview(row)}</div>`;
 }
 function launchAudit(launch) {
-const v = launch.validation;
+const v = launch.validation, w = launch.walkForward;
 const buckets = launch.bucketStats.map(b => `<tr><th scope="row">${b.lo}–${b.hi === Infinity ? '∞' : b.hi} d</th><td>${b.withToken}/${b.n}</td><td>${(b.tokenRate*100).toFixed(1)}%</td></tr>`).join('');
-return `<h3>Launch model · leave-one-out, ${v.n} aged records</h3><p>Token prediction from the rest of the snapshot: <b>${(v.accuracy*100).toFixed(1)}%</b> correct vs ${(v.baseRate*100).toFixed(1)}% majority base. Ever-rate ${(launch.everGlobal*100).toFixed(1)}% raw → ${(launch.everGlobalCorrected*100).toFixed(1)}% age-corrected.</p><div class="compare-table"><table><thead><tr><th>Tracked age</th><th>Tokenized</th><th>Rate</th></tr></thead><tbody>${buckets}</tbody></table></div>`;
+return `<h3>Launch model · held-out validation</h3><p>LOO (${v.n}): <b>${(v.accuracy*100).toFixed(1)}%</b> vs ${(v.baseRate*100).toFixed(1)}% base · Brier <b>${v.brier.toFixed(3)}</b> vs ${v.baseBrier.toFixed(3)}. Walk-forward (${w.n} records, ${w.dates} cohorts): <b>${(w.accuracy*100).toFixed(1)}%</b> vs ${(w.baseRate*100).toFixed(1)}% · Brier <b>${w.brier.toFixed(3)}</b> vs ${w.baseBrier.toFixed(3)}. Ever-rate ${(launch.everGlobal*100).toFixed(1)}% raw → ${(launch.everGlobalCorrected*100).toFixed(1)}% age-corrected.</p>${table('<th>Tracked age</th><th>Tokenized</th><th>Rate</th>', buckets)}`;
 }
 function coverageAudit(cov) {
 return `<h3>Range coverage · ${cov.n} held-out traded caps</h3><p>P20–P80 band holds the real cap <b>${(cov.coverage*100).toFixed(1)}%</b> vs 60% nominal — honestly under-covered. Within 2× of median: ${(cov.withinTwoRate*100).toFixed(1)}%.</p>`;
@@ -74,11 +75,9 @@ const cells = [
 ['Base cap', r => `<strong>${compact(r.implied_value_usd)}</strong>`], ['Peer cases', r => band(r)],
 ['Launch odds', r => (r.launch_odds*100).toFixed(1)+'%'],
 ['Farm verdict', r => r.econ.verdict + (r.econ.deposit > 0 ? ' · ' + usd(r.econ.perHour) + '/h' : '')],
-['7-day TVL', r => growth(r.change_7d)], ['Tracking age', r => r.age_days === null ? 'Unreported' : `${r.age_days} days`],
-['Peer support', r => `${r.calibration.nearComparable} within 4× TVL`],
-['Access route', r => escape(r.route)], ['Trial principal', r => `${money(r.capital)}${r.feeCap ? ` · ${money(r.feeCap)} fees max` : ''}`],
-['Next action', r => escape(r.plan[1].title)], ['Exit check', r => escape(r.plan[3].text)]];
-return `<p class="note">Base valuations, launch odds, economics and exit plans side by side.</p><div class="compare-table"><table><thead><tr><th scope="col">Measure</th>${rows.map(r => `<th scope="col"><small>Rank ${r.rank}</small>${escape(r.name)}</th>`).join('')}</tr></thead><tbody>${cells.map(([label,value]) => `<tr><th scope="row">${label}</th>${rows.map(r => `<td>${value(r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+['7-day TVL', r => growth(r.change_7d)],
+['Access route', r => escape(r.route)], ['Trial principal', r => `${money(r.capital)}${r.feeCap ? ` · ${money(r.feeCap)} fees max` : ''}`]];
+return table(`<th scope="col">Measure</th>${rows.map(r => `<th scope="col"><small>Rank ${r.rank}</small>${escape(r.name)}</th>`).join('')}`, cells.map(([label,value]) => `<tr><th scope="row">${label}</th>${rows.map(r => `<td>${value(r)}</td>`).join('')}</tr>`).join(''));
 }
 function validation(audit) {
 const names = {size:'TVL-near + category', prior:'Previous category model', fixed:'Fixed 0.25×'};
@@ -87,7 +86,7 @@ const items = Object.entries(names).map(([id,title]) => {
 const {medianFactor, meanLog, withinTwo} = audit.metrics[id];
 return `<tr><th scope="row">${title}</th><td>${medianFactor.toFixed(2)}×</td><td>${meanLog.toFixed(3)}</td><td>${withinTwo}/${audit.count}</td></tr>`;
 });
-return `<h3>Held-out calibration · ${audit.count} traded protocols</h3><p>Withhold the target and same-token records; predict its cap from TVL and category only. Lower error and more within-2× are better.</p><div class="compare-table"><table><thead><tr><th>Model</th><th>Median error factor</th><th>Mean abs. log error</th><th>Within 2×</th></tr></thead><tbody>${items.join('')}</tbody></table></div><p class="note">Same snapshot and exclusions for every baseline; tests the multiple on traded tokens, not launch prices.</p>`;
+return `<h3>Held-out calibration · ${audit.count} traded protocols</h3><p>Withhold target and same-token records; predict cap from TVL and category only. Lower error and more within-2× are better.</p>${table('<th>Model</th><th>Median error factor</th><th>Mean abs. log error</th><th>Within 2×</th>', items.join(''))}<p class="note">Same snapshot and exclusions per baseline; tests the multiple on traded tokens, not launch prices.</p>`;
 }
 root.RadarView = {escape, compact, growth, band, usd, render, scenarioResult, compare, validation, launchAudit, coverageAudit, econResult};
 })(globalThis);

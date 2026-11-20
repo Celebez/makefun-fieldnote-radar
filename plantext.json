@@ -1,0 +1,12 @@
+{
+  "verifyExclusion": "Identify the product and its token relationship in official docs. Required watchlist record, screening flag: {exclusion}.",
+  "verify": "Locate {name} in official docs; match app, chain and contract to the documented deployment; check token and participation terms.",
+  "trialSuffix": " If fees and terms fit, cap principal at US${capital} {chain}.",
+  "follow": "Track input, output and receipts; review fee, liquidity and participation terms weekly.",
+  "feeStop": " Stop if quoted total fees would exceed the fee budget.",
+  "exit": "Quote a small return swap or redemption to the underlying asset; reconcile output with the receipt; revoke unneeded approvals.",
+  "investigateExclusion": "Verify the underlying token, its issuer and where it trades; no deposit trial.",
+  "investigate": "Identify the intended user; read access and withdrawal terms. Unclear access or exit means capital stays at zero.",
+  "track": "Check the official changelog and eligibility weekly; record access, asset or redemption changes; stop on restrictions.",
+  "goNoGo": "Require a verified product, eligible account and documented exit before any trial; unknown or gated access means skip."
+}

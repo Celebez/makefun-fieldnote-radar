@@ -43,7 +43,7 @@ function calibration(peers, target) {
   return {near, category, categoryWeight, nearComparable, nearQuantiles, categoryQuantiles, range};
 }
 function audit(peers) {
-  // Withhold each cap and same-token records; tests the multiple on traded records.
+  // Hold out each cap + same-token records; tests traded multiples.
   const absoluteLogError = {fixed:[], prior:[], size:[]};
   let count = 0;
   for (const p of peers) {

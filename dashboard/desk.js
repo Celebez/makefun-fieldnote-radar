@@ -211,8 +211,8 @@ $('metrics').innerHTML = [['Watchlist',`${data.watch_covered}/${data.watch_count
 .map(([name,number]) => `<div><dt>${name}</dt><dd>${number}</dd></div>`).join('');
 // Integrity seal, composition, inline validation — all traceable to board.json and the audits.
 const pct = x => (x*100).toFixed(1)+'%';
-const c = data.composition, v = data.launch.validation, cov = data.coverage;
-$('assurance').innerHTML = `<div class="seal" role="status"><b>✓ Integrity</b> sha256 ${INTEGRITY.sha256.slice(0,12)} · ranks ${INTEGRITY.ranks} · non-increasing · watchlist ${INTEGRITY.watchlist}</div><div class="composition"><b>${c.universe}</b> = ${c.candidates} candidates (${c.watch} watch + ${c.additional} extra) + ${c.traded} traded + ${c.screened} screened</div><div class="vchips"><span>Launch leave-one-out <b>${pct(v.accuracy)}</b> vs ${pct(v.baseRate)} base · n=${v.n}</span><span>Coverage <b>${pct(cov.coverage)}</b> vs 60% · n=${cov.n}</span><span>Size model <b>${data.audit.metrics.size.medianFactor.toFixed(2)}×</b> median error</span></div>`;
+const c = data.composition, v = data.launch.validation, w = data.launch.walkForward, cov = data.coverage;
+$('assurance').innerHTML = `<div class="seal" role="status"><b>✓ Integrity</b> sha256 ${INTEGRITY.sha256.slice(0,12)} · ranks ${INTEGRITY.ranks} · non-increasing · watchlist ${INTEGRITY.watchlist}</div><div class="composition"><b>${c.universe}</b> = ${c.candidates} candidates (${c.watch} watch + ${c.additional} extra) + ${c.traded} traded + ${c.screened} screened</div><div class="vchips"><span>Launch LOO <b>${pct(v.accuracy)}</b> · Brier ${v.brier.toFixed(3)} vs ${v.baseBrier.toFixed(3)}</span><span>Walk-forward <b>${pct(w.accuracy)}</b> · Brier ${w.brier.toFixed(3)} vs ${w.baseBrier.toFixed(3)}</span><span>Coverage <b>${pct(cov.coverage)}</b> vs 60%</span><span>Size model <b>${data.audit.metrics.size.medianFactor.toFixed(2)}×</b> error</span></div>`;
 $('coverage').textContent = `${data.universe} protocols · ${data.excluded.length} screened out · ${data.live.length} with token indicators`;
 $('source').textContent = data.source;
 $('modelAudit').innerHTML = RadarView.validation(data.audit);
